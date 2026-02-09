@@ -1,4 +1,4 @@
-﻿// Copyright © 2025 Dave Ryley
+﻿// Copyright © 2026 Dave Ryley
 
 
 #include "MovieSceneImageSection.h"
@@ -9,6 +9,7 @@
 UMovieSceneImageSection::UMovieSceneImageSection(const FObjectInitializer& ObjInit)
 	: Super(ObjInit)
 {
+	OpacityMultiplier.SetDefault(1.f);
 }
 
 void UMovieSceneImageSection::SetTexture(UTexture2D* InTexture)
@@ -19,7 +20,7 @@ void UMovieSceneImageSection::SetTexture(UTexture2D* InTexture)
 	}
 	Texture = InTexture;
 	Texture->AddToRoot();
-	if (Texture) // Since this texture is used as UI, don't allow it affected by budget.
+	if (Texture)
 	{
 		Texture->bForceMiplevelsToBeResident = true;
 		Texture->bIgnoreStreamingMipBias = true;
@@ -27,29 +28,47 @@ void UMovieSceneImageSection::SetTexture(UTexture2D* InTexture)
 	EnsureBrushHasTexture();
 }
 
+float UMovieSceneImageSection::GetOpacityAtFrame(const FFrameTime FrameTime) const
+{
+	float Result = 1.f;
+	OpacityMultiplier.Evaluate(FrameTime, Result);
+	return Result;
+}
+
 void UMovieSceneImageSection::EnsureBrushHasTexture()
 {
 	if(Brush.GetResourceObject() != Texture)
 	{
 		Brush.SetResourceObject(Texture);
-
-		// 			if (bMatchSize)
-		// 			{
-		// 				if (Texture)
-		// 				{
-		// // #if WITH_EDITOR
-		// // 					FTextureCompilingManager::Get().FinishCompilation({ Texture });
-		// // #endif
-		// 					Brush.ImageSize.X = static_cast<float>(Texture->GetSizeX());
-		// 					Brush.ImageSize.Y = static_cast<float>(Texture->GetSizeY());
-		// 				}
-		// 				else
-		// 				{
-		// 					Brush.ImageSize = FVector2D(0, 0);
-		// 				}
-		// 			}
-
 	}
+}
+
+void UMovieSceneImageSection::InitialPlacementOnRow(const TArray<UMovieSceneSection*>& Sections,
+	FFrameNumber InStartTime, int32 Duration, int32 InRowIndex)
+{
+	check(Duration >= 0);
+	// We don't necessarily want to get the furthest end frame if we can slot the new section between existing sections.
+	// Most straightforward approach is to keep moving section to the end of any section we overlap until we don't overlap any
+	bool bFoundOverlap = true;
+	while (bFoundOverlap)
+	{
+		TRange<FFrameNumber> ThisRange = TRange<FFrameNumber>(InStartTime, InStartTime + Duration);
+		bFoundOverlap = false;
+		for (const auto Section : Sections)
+		{
+			check(Section);
+			if ((this != Section) && (Section->GetRowIndex() == InRowIndex))
+			{
+				if (ThisRange.Overlaps(Section->GetRange()))
+				{
+					InStartTime = Section->GetExclusiveEndFrame();
+					bFoundOverlap = true;
+					break;
+				}
+			}
+		}
+	}
+	Super::InitialPlacementOnRow(Sections, InStartTime, Duration, InRowIndex);
 }
 
 void UMovieSceneImageSection::ImportEntityImpl(UMovieSceneEntitySystemLinker* EntityLinker,
@@ -65,5 +84,6 @@ void UMovieSceneImageSection::ImportEntityImpl(UMovieSceneEntitySystemLinker* En
 		.Add(BuiltInComponents->TrackInstance, FMovieSceneTrackInstanceComponent{ decltype(FMovieSceneTrackInstanceComponent::Owner)(this), USequencerImageTrackInstance::StaticClass() })
 		.AddConditional(BuiltInComponents->GenericObjectBinding, ObjectBindingID, ObjectBindingID.IsValid())
 		.AddTagConditional(BuiltInComponents->Tags.Root, !ObjectBindingID.IsValid())
+		.Add(BuiltInComponents->FloatChannel[0], &OpacityMultiplier)
 	);
 }

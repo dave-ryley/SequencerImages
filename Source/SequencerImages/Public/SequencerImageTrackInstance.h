@@ -1,4 +1,4 @@
-﻿// Copyright © 2025 Dave Ryley
+﻿// Copyright © 2026 Dave Ryley
 
 #pragma once
 
@@ -16,18 +16,12 @@ class SEQUENCERIMAGES_API USequencerImageTrackInstance : public UMovieSceneTrack
 	GENERATED_BODY()
 
 private:
-	virtual void OnInitialize() override;
+	virtual void OnInputAdded(const FMovieSceneTrackInstanceInput& InInput) override;
 
 	virtual void OnAnimate() override;
 
-	virtual void OnBeginUpdateInputs() override;
-
-	virtual void OnInputAdded(const FMovieSceneTrackInstanceInput& InInput) override;
-
 	virtual void OnInputRemoved(const FMovieSceneTrackInstanceInput& InInput) override;
-
-	virtual void OnEndUpdateInputs() override;
-
+	
 	virtual void OnDestroyed() override;
 
 private:

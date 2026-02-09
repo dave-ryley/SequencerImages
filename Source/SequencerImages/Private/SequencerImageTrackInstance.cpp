@@ -1,4 +1,4 @@
-﻿// Copyright © 2025 Dave Ryley
+﻿// Copyright © 2026 Dave Ryley
 
 
 #include "SequencerImageTrackInstance.h"
@@ -10,24 +10,8 @@
 #include "MovieSceneImageSection.h"
 #include "SequencerImages.h"
 
-void USequencerImageTrackInstance::OnInitialize()
-{
-	UE_LOG(LogSequencerImages, Log, TEXT("OnInitialize"));
-}
-
-void USequencerImageTrackInstance::OnAnimate()
-{
-	UE_LOG(LogSequencerImages, Log, TEXT("OnAnimate"));
-}
-
-void USequencerImageTrackInstance::OnBeginUpdateInputs()
-{
-	UE_LOG(LogSequencerImages, Log, TEXT("OnBeginUpdateInputs"));
-}
-
 void USequencerImageTrackInstance::OnInputAdded(const FMovieSceneTrackInstanceInput& InInput)
 {
-	UE_LOG(LogSequencerImages, Log, TEXT("OnInputAdded"));
 	if (UMovieSceneImageSection* ImageSection = Cast<UMovieSceneImageSection>(InInput.Section))
 	{
 		Sections.Add(ImageSection);
@@ -73,9 +57,16 @@ void USequencerImageTrackInstance::OnInputAdded(const FMovieSceneTrackInstanceIn
 	}
 }
 
+void USequencerImageTrackInstance::OnAnimate()
+{
+	// for (auto SectionWidgetPair : ImageMap)
+	// {
+	// 	SectionWidgetPair.Value->SetColorAndOpacity(FSlateColor{0,0,0,SectionWidgetPair.Key.GetOpacity})
+	// }
+}
+
 void USequencerImageTrackInstance::OnInputRemoved(const FMovieSceneTrackInstanceInput& InInput)
 {
-	UE_LOG(LogSequencerImages, Log, TEXT("OnInputRemoved"));
 	if (UMovieSceneImageSection* ImageSection = Cast<UMovieSceneImageSection>(InInput.Section))
 	{
 		Sections.Remove(ImageSection);
@@ -119,11 +110,6 @@ void USequencerImageTrackInstance::OnInputRemoved(const FMovieSceneTrackInstance
 			
 		}
 	}
-}
-
-void USequencerImageTrackInstance::OnEndUpdateInputs()
-{
-	UE_LOG(LogSequencerImages, Log, TEXT("OnEndUpdateInputs"));
 }
 
 void USequencerImageTrackInstance::OnDestroyed()
