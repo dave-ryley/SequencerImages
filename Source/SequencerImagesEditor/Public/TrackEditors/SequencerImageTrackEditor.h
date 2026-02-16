@@ -1,4 +1,6 @@
-﻿#pragma once
+﻿// Copyright © 2026 Dave Ryley
+
+#pragma once
 #include "MovieSceneTrackEditor.h"
 #include "SequencerImageTrack.h"
 #include "Slate/DeferredCleanupSlateBrush.h"

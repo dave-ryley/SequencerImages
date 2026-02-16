@@ -1,4 +1,6 @@
-﻿#pragma once
+﻿// Copyright © 2026 Dave Ryley
+
+#pragma once
 
 #include "CoreMinimal.h"
 #include "ISequencerModule.h"

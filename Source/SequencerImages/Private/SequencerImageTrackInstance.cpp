@@ -1,6 +1,5 @@
 ﻿// Copyright © 2026 Dave Ryley
 
-
 #include "SequencerImageTrackInstance.h"
 
 #if WITH_EDITOR

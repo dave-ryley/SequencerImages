@@ -1,4 +1,6 @@
-﻿using UnrealBuildTool;
+﻿// Copyright © 2026 Dave Ryley
+
+using UnrealBuildTool;
 
 public class SequencerImagesEditor : ModuleRules
 {

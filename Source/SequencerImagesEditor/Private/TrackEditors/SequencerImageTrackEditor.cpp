@@ -1,4 +1,6 @@
-﻿#include "TrackEditors/SequencerImageTrackEditor.h"
+﻿// Copyright © 2026 Dave Ryley
+
+#include "TrackEditors/SequencerImageTrackEditor.h"
 
 #include "MovieSceneToolHelpers.h"
 #include "SequencerImageTrack.h"

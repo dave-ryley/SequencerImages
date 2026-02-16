@@ -1,4 +1,4 @@
-﻿// Copyright © 2025 Dave Ryley
+﻿// Copyright © 2026 Dave Ryley
 
 #pragma once
 
