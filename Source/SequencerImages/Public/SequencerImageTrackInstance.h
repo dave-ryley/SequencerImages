@@ -16,6 +16,8 @@ class SEQUENCERIMAGES_API USequencerImageTrackInstance : public UMovieSceneTrack
 	GENERATED_BODY()
 
 private:
+	virtual void OnBeginUpdateInputs() override;
+	
 	virtual void OnInputAdded(const FMovieSceneTrackInstanceInput& InInput) override;
 
 	virtual void OnAnimate() override;
@@ -28,5 +30,5 @@ private:
 	UPROPERTY()
 	TArray<UMovieSceneImageSection*> Sections;
 
-	TMap<UMovieSceneImageSection*, TSharedPtr<SImage>> ImageMap;
+	TMap<UMovieSceneImageSection*, TSharedPtr<SBorder>> ImageMap;
 };
