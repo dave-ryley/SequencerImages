@@ -10,23 +10,39 @@
 #include "MovieSceneImageSection.h"
 #include "SequencerImages.h"
 
+void USequencerImageTrackInstance::OnBeginUpdateInputs()
+{
+	
+}
+
 void USequencerImageTrackInstance::OnInputAdded(const FMovieSceneTrackInstanceInput& InInput)
 {
 	if (UMovieSceneImageSection* ImageSection = Cast<UMovieSceneImageSection>(InInput.Section))
 	{
 		Sections.Add(ImageSection);
-
-		ImageSection->EnsureBrushHasTexture();
-		const FSlateBrush* Brush = ImageSection->GetBrush();
-
-		TSharedPtr<SImage> ImageWidget = SNew(SImage)
-			.Image(Brush);
+		
 		UWorld* World = GetWorld();
 		if (!World)
 		{
 			UE_LOG(LogSequencerImages, Log, TEXT("No World Found"));
 			return;
 		}
+		
+		ImageSection->EnsureBrushHasTexture();
+		const FSlateBrush* Brush = ImageSection->GetBrush();
+		TSharedPtr<SBorder> Border = SNew(SBorder)
+		.BorderImage( FAppStyle::GetBrush( TEXT("WhiteTexture") ) )
+		.Padding(FMargin{0})
+		.BorderBackgroundColor(ImageSection->GetBackgroundColor())
+		[
+			SNew(SScaleBox)
+			.Stretch(ImageSection->GetLockAspectRatio() ? EStretch::ScaleToFit : EStretch::Fill)
+			[
+				SNew(SImage)
+				.Image(Brush)
+				.RenderOpacity(ImageSection->GetUsingOnionSkin() ? ImageSection->GetOnionSkinOpacity() : 1.0f)
+			]
+		];
 
 		if (World->IsGameWorld())
 		{
@@ -36,7 +52,7 @@ void USequencerImageTrackInstance::OnInputAdded(const FMovieSceneTrackInstanceIn
 				UE_LOG(LogSequencerImages, Log, TEXT("No ViewportClient Found"));
 				return;
 			}
-			ViewportClient->AddViewportWidgetContent(ImageWidget.ToSharedRef());
+			ViewportClient->AddViewportWidgetContent(Border.ToSharedRef());
 		}
 #if WITH_EDITOR
 		else
@@ -47,13 +63,13 @@ void USequencerImageTrackInstance::OnInputAdded(const FMovieSceneTrackInstanceIn
 			{
 				for (TSharedPtr<SLevelViewport> LevelViewport : LevelEditor->GetViewports())
 				{
-					LevelViewport->AddOverlayWidget(ImageWidget.ToSharedRef());
+					LevelViewport->AddOverlayWidget(Border.ToSharedRef());
 				}
 			}
 		}
 #endif
 
-		ImageMap.Add(ImageSection, MoveTemp(ImageWidget));
+		ImageMap.Add(ImageSection, MoveTemp(Border));
 	}
 }
 
@@ -80,7 +96,7 @@ void USequencerImageTrackInstance::OnInputRemoved(const FMovieSceneTrackInstance
 
 		if (ImageMap.Contains(ImageSection))
 		{
-			if (TSharedPtr<SImage> ImageWidget = ImageMap[ImageSection]; ImageWidget.IsValid())
+			if (TSharedPtr<SBorder> BorderWidget = ImageMap[ImageSection]; BorderWidget.IsValid())
 			{
 				if (World->IsGameWorld())
 				{
@@ -90,7 +106,7 @@ void USequencerImageTrackInstance::OnInputRemoved(const FMovieSceneTrackInstance
 						UE_LOG(LogSequencerImages, Warning, TEXT("No ViewportClient Found"));
 						return;
 					}
-					ViewportClient->RemoveViewportWidgetContent(ImageWidget.ToSharedRef());
+					ViewportClient->RemoveViewportWidgetContent(BorderWidget.ToSharedRef());
 				}
 #if WITH_EDITOR
 				else
@@ -101,7 +117,7 @@ void USequencerImageTrackInstance::OnInputRemoved(const FMovieSceneTrackInstance
 					{
 						for (TSharedPtr<SLevelViewport> LevelViewport : LevelEditor->GetViewports())
 						{
-							LevelViewport->RemoveOverlayWidget(ImageWidget.ToSharedRef());
+							LevelViewport->RemoveOverlayWidget(BorderWidget.ToSharedRef());
 						}
 					}
 				}
@@ -132,7 +148,7 @@ void USequencerImageTrackInstance::OnDestroyed()
 			UE_LOG(LogSequencerImages, Warning, TEXT("No ViewportClient Found"));
 			return;
 		}
-		for (TTuple<UMovieSceneImageSection*, TSharedPtr<SImage>> ImagePair : ImageMap)
+		for (TTuple ImagePair : ImageMap)
 		{
 			if (ImagePair.Value.IsValid())
 			{
@@ -149,7 +165,7 @@ void USequencerImageTrackInstance::OnDestroyed()
 		{
 			for (TSharedPtr<SLevelViewport> LevelViewport : LevelEditor->GetViewports())
 			{
-				for (TTuple<UMovieSceneImageSection*, TSharedPtr<SImage>> ImagePair : ImageMap)
+				for (TTuple ImagePair : ImageMap)
 				{
 					if (ImagePair.Value.IsValid())
 					{

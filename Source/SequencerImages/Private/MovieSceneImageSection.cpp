@@ -40,6 +40,9 @@ void UMovieSceneImageSection::EnsureBrushHasTexture()
 	if(Brush.GetResourceObject() != Texture)
 	{
 		Brush.SetResourceObject(Texture);
+		Brush.SetImageSize(Texture->GetImportedSize());
+		Brush.DrawAs = ESlateBrushDrawType::Image;
+		Brush.Tiling = ESlateBrushTileType::NoTile;
 	}
 }
 

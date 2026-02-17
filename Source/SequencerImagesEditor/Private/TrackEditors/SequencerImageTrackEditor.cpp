@@ -371,7 +371,7 @@ TSharedRef<SWidget> FImageSection::GenerateSectionWidget()
 			float SizeX = Texture->Source.GetSizeX();
 			float SizeY = Texture->Source.GetSizeY();
 			AspectRatio = SizeX / SizeY;
-			return ThumnailImageWidget.ToSharedRef();
+			return SNullWidget::NullWidget;
 		}
 	}
 
